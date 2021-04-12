@@ -35,14 +35,6 @@ public class ListBean {
         this.priority = priority;
     }
 
-
-
-    public String toJson() {
-        return "{" +
-                "title: '" + title + '\'' +
-                '}';
-    }
-
     public void setTitle(String title) {
         this.title = title;
     }
