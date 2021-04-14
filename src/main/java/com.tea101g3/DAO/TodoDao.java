@@ -17,11 +17,12 @@ public class TodoDao {
     String passwd = "123456";
 
     private static final String INSERT_STMT = "INSERT INTO todolist (id, priority,orderby,title) VALUES (?, ?, ?,?)";
-    private static final String GET_ALL_STMT = "SELECT * FROM todolist";
+    private static final String GET_ALL_STMT = "SELECT * FROM todolist ORDER BY orderby ASC";
+    private static final String GET_ONE_STMT = "SELECT * FROM todolist WHERE id = ?";
 
     private static final String DELETE_STMT = "DELETE FROM todolist where id = ?";
 
-    private static final String UPDATE = "UPDATE todolist set priority=?, orderby=?, title=? where orderby = ?";
+    private static final String UPDATE_STMT = "UPDATE todolist set priority=?, orderby=?, title=? where id = ?";
 
     public List<ListBean> getAll() {
         List<ListBean> list = new ArrayList<>();
@@ -71,6 +72,53 @@ public class TodoDao {
         return list;
     }
 
+    public ListBean getOne(String srcId) {
+        ListBean bean = new ListBean();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            Class.forName(driver);
+            con = DriverManager.getConnection(url, userid, passwd);
+            pstmt = con.prepareStatement(GET_ONE_STMT);
+            pstmt.setString(1, srcId);
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                bean.setId(rs.getString("id"));
+                bean.setPriority(rs.getInt("priority"));
+                bean.setOrderBy(rs.getInt("orderby"));
+                bean.setTitle(rs.getString("title"));
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }finally {
+            if(rs != null){
+                try {
+                    rs.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if(pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if(con != null){
+                try {
+                    con.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+
+        }
+        return bean;
+    }
+
     public void createOne(ListBean newBean) {
         Connection con = null;
         PreparedStatement pstmt = null;
@@ -84,7 +132,6 @@ public class TodoDao {
             pstmt.setString(4, newBean.getTitle());
 
             Boolean success = pstmt.execute();
-            System.out.println(!success?"Create success":"something Wrong");
 
 
         } catch (ClassNotFoundException | SQLException e) {
@@ -118,7 +165,42 @@ public class TodoDao {
             pstmt.setString(1, srcId);
 
             int deleteCount = pstmt.executeUpdate();
-            System.out.println("Deleted " + deleteCount + " rows");
+
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }finally {
+            if(pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if(con != null){
+                try {
+                    con.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    public void updateOne(ListBean updateBean) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            Class.forName(driver);
+            con = DriverManager.getConnection(url, userid, passwd);
+            pstmt = con.prepareStatement(UPDATE_STMT);
+            pstmt.setInt(1, updateBean.getPriority());
+            pstmt.setInt(2, updateBean.getOrderBy());
+            pstmt.setString(3, updateBean.getTitle());
+            pstmt.setString(4, updateBean.getId());
+
+            int updateCount = pstmt.executeUpdate();
 
 
         } catch (ClassNotFoundException | SQLException e) {

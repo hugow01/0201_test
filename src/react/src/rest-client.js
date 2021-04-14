@@ -12,16 +12,17 @@ class PubClient {
     }
 
     post(params={}, ...path) {
-        console.log('post')
         Axios.post(baseUrl + paths(...path), params)
     }
 
-    put() {
-
+    put(params,...path) {
+        const result = Axios.put(baseUrl + paths(...path), params, {})  
+        return result
     }
 
     delete(params,...path) {
-        Axios.delete(baseUrl + paths(...path)+'?deleteId='+params)
+        const result = Axios.delete(baseUrl + paths(...path)+'?deleteId='+params, {})
+        return result
     }
 }
 
