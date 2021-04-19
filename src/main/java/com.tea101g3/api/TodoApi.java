@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.core.*;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tea101g3.entity.*;
 import com.tea101g3.DAO.TodoDao;
+import com.tea101g3.service.TodoService;
 
 @WebServlet(
         urlPatterns={"/todolist"},
@@ -25,25 +28,19 @@ import com.tea101g3.DAO.TodoDao;
 public class TodoApi extends HttpServlet{
     ObjectMapper objectMapper = new  ObjectMapper();
     TodoDao todoDao = new TodoDao();
+    TodoService todoService = new TodoService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        System.out.println("todo_get");
         PrintWriter writer = resp.getWriter();
         resp.setContentType("text/json");
         resp.setCharacterEncoding("utf-8");
-        List<ListBean> todolist = todoDao.getAll();
-        String resultJson = objectMapper.writeValueAsString(todolist);
-        System.out.println(resultJson);
-
-        writer.print(resultJson);
-        System.out.println("todo_get.end");
+        writer.print( getAll());
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("todo_post");
         BufferedReader reader = req.getReader();
         String reqJson = "";
         String str = "";
@@ -52,21 +49,23 @@ public class TodoApi extends HttpServlet{
         }
 
         ListBean creatBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
-        System.out.println(creatBean);
         todoDao.createOne(creatBean);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("todo_delete");
         String srcId = req.getParameter("deleteId");
-        todoDao.deleteOne(srcId);
+        todoService.deleteOne(srcId);
+
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("text/json");
+        resp.setCharacterEncoding("utf-8");
+        writer.print(getAll());
 
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("todo_put");
         BufferedReader reader = req.getReader();
         String reqJson = "";
         String str = "";
@@ -74,7 +73,25 @@ public class TodoApi extends HttpServlet{
             reqJson += str;
         }
 
-        ListBean deleteBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
-        System.out.println(deleteBean);
+        ListBean updateBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
+        todoService.updateOne(updateBean);
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("text/json");
+        resp.setCharacterEncoding("utf-8");
+        writer.print(getAll());
+
+    }
+
+    String getAll() {
+        List<ListBean> todolist = todoDao.getAll();
+        String resultJson = null;
+        Date timeStamp = new Timestamp(0);
+        java.sql.Date timeStamp2 = new java.sql.Date(timeStamp.getTime());
+        try {
+            resultJson = objectMapper.writeValueAsString(todolist);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return resultJson;
     }
 }
