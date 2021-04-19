@@ -85,8 +85,6 @@ public class TodoApi extends HttpServlet{
     String getAll() {
         List<ListBean> todolist = todoDao.getAll();
         String resultJson = null;
-        Date timeStamp = new Timestamp(0);
-        java.sql.Date timeStamp2 = new java.sql.Date(timeStamp.getTime());
         try {
             resultJson = objectMapper.writeValueAsString(todolist);
         } catch (JsonProcessingException e) {

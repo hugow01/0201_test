@@ -114,3 +114,4 @@ dist
 /.idea
 /target/
 /build
+postgresql-42.2.19.jar
