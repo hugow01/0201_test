@@ -17,6 +17,7 @@ export default () => {
         setReady(true)
     }, [])
 
+
     const handleLoad = async () => {
         const { data } = await pubClient.get('todolist')
         setContent([...data])
@@ -39,10 +40,17 @@ export default () => {
 
     function handleChange(index, event) {
         const value = event.target.value
-        let tempContent = [...content]
-        tempContent[index] = { ...tempContent[index], title: value }
-        setContent(tempContent)
-        pubClient.put(tempContent[index], 'todolist')
+        // let tempContent = [...content]
+        // tempContent[index] = { ...tempContent[index], title: value }
+        setContent(prev=>{
+            console.log('prev')
+            console.log(prev)
+            prev[index]={...prev[index], title: value}
+            pubClient.put(prev[index], 'todolist')
+            return [...prev]
+        })
+        // pubClient.put(tempContent[index], 'todolist')
+        
     }
 
     async function handleDelete(index) {
@@ -54,14 +62,18 @@ export default () => {
     async function handleswap(index, swap) {
         const lastIndex = content.length - 1
         if (index !== lastIndex || index !== 0) {
-            let tempContent = [...content]
-            tempContent[index + swap] = { ...content[index], orderBy: content[index + swap].orderBy }
-            tempContent[index] = { ...content[index + swap], orderBy: content[index].orderBy }
-            setContent([...tempContent])
-            pubClient.put(tempContent[index], 'todolist')
-            const { data } = await pubClient.put(tempContent[index + swap], 'todolist')
-            handleLoad()
-            
+            // let tempContent = [...content]
+            // tempContent[index + swap] = { ...content[index], orderBy: content[index + swap].orderBy }
+            // tempContent[index] = { ...content[index + swap], orderBy: content[index].orderBy }
+            // setContent([...tempContent])
+            setContent(prev=>{
+                let temp = [...prev]
+                temp[index]={...prev[index+swap], orderBy: prev[index].orderBy}
+                temp[index+swap]={...prev[index], orderBy: prev[index+swap].orderBy}
+                pubClient.put(temp[index], 'todolist')
+            pubClient.put(temp[index + swap], 'todolist')
+                return [...temp]
+            })
         }
 
     }
