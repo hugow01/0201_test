@@ -6,7 +6,7 @@ import { faArrowAltCircleDown, faArrowAltCircleUp, faTimesCircle } from '@fortaw
 
 export default () => {
     const CONSTRUCT = { id: '', orderBy: 0, priority: 0, title: '' }
-    const [content, setContent] = useState([])
+    const [content, setContent] = useState()
     const [tempTitle, setTempTitle] = useState('')
     const [editable, setEditable] = useState('')
     const [ready, setReady] = useState(false)
@@ -14,7 +14,6 @@ export default () => {
 
     useEffect(() => {
         handleLoad()
-        setReady(true)
     }, [])
 
 
@@ -40,8 +39,6 @@ export default () => {
 
     function handleChange(index, event) {
         const value = event.target.value
-        // let tempContent = [...content]
-        // tempContent[index] = { ...tempContent[index], title: value }
         setContent(prev=>{
             console.log('prev')
             console.log(prev)
@@ -49,7 +46,6 @@ export default () => {
             pubClient.put(prev[index], 'todolist')
             return [...prev]
         })
-        // pubClient.put(tempContent[index], 'todolist')
         
     }
 
@@ -62,10 +58,6 @@ export default () => {
     async function handleswap(index, swap) {
         const lastIndex = content.length - 1
         if (index !== lastIndex || index !== 0) {
-            // let tempContent = [...content]
-            // tempContent[index + swap] = { ...content[index], orderBy: content[index + swap].orderBy }
-            // tempContent[index] = { ...content[index + swap], orderBy: content[index].orderBy }
-            // setContent([...tempContent])
             setContent(prev=>{
                 let temp = [...prev]
                 temp[index]={...prev[index+swap], orderBy: prev[index].orderBy}
@@ -102,7 +94,7 @@ export default () => {
                 </div>
                 <hr />
                 <div className='text-start form-group px-3'>
-                    {content.map((rowData, index) => (
+                    {content?.map((rowData, index) => (
                         <div className='card shadow-sm mt-2 px-3 d-flex row' key={index} onClick={() => { handleFocus(index) }}>
                             <div className="input-group my-1">
                                 <div className="input-group-prepend">
@@ -153,15 +145,6 @@ export default () => {
                         </div>
                     ))}
                 </div>
-                {content.length > 0 &&
-                    <>
-                        <hr />
-                        <div className='d-flex justify-content-center'>
-                            <button className='btn btn-danger mx-1' onClick={() => setContent([])}>清除</button>
-                            <button className='btn btn-primary mx-1' onClick={() => console.log(content)}>儲存</button>
-                        </div>
-                    </>
-                }
             </div>
         </>
     )
