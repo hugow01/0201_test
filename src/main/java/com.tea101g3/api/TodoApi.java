@@ -8,9 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.core.*;
@@ -72,7 +69,7 @@ public class TodoApi extends HttpServlet{
         while((str = reader.readLine())!= null) {
             reqJson += str;
         }
-
+        System.out.println(reqJson);
         ListBean updateBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
         todoService.updateOne(updateBean);
         PrintWriter writer = resp.getWriter();

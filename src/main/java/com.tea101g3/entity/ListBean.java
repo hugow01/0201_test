@@ -3,6 +3,7 @@ package com.tea101g3.entity;
 
 public class ListBean {
     private String id;
+    private Integer checked;
     private String title;
     private Integer orderBy;
     private Integer priority;
@@ -11,6 +12,7 @@ public class ListBean {
     public String toString() {
         return "ListBean{" +
                 "id=" + id + '\'' +
+                "checked=" + checked + '\'' +
                 ",title='" + title + '\'' +
                 ", orderBy=" + orderBy +
                 ", priority=" + priority +
@@ -44,5 +46,9 @@ public class ListBean {
     public String getTitle() {
         return title;
     }
+
+    public Integer getChecked() {  return checked; }
+
+    public void setChecked(Integer checked) { this.checked = checked; }
 
 }
