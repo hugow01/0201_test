@@ -16,13 +16,13 @@ public class TodoDao {
     String userid = "hr";
     String passwd = "123456";
 
-    private static final String INSERT_STMT = "INSERT INTO todolist (id, priority,orderby,title) VALUES (?, ?, ?,?)";
+    private static final String INSERT_STMT = "INSERT INTO todolist (id, priority, orderby, title, checked) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_ALL_STMT = "SELECT * FROM todolist ORDER BY orderby ASC";
     private static final String GET_ONE_STMT = "SELECT * FROM todolist WHERE id = ?";
 
     private static final String DELETE_STMT = "DELETE FROM todolist where id = ?";
 
-    private static final String UPDATE_STMT = "UPDATE todolist set priority=?, orderby=?, title=? where id = ?";
+    private static final String UPDATE_STMT = "UPDATE todolist set priority=?, orderby=?, title=?, checked=? where id = ?";
 
     public List<ListBean> getAll() {
         List<ListBean> list = new ArrayList<>();
@@ -38,6 +38,7 @@ public class TodoDao {
             while(rs.next()){
                 ListBean bean = new ListBean();
                 bean.setId(rs.getString("id"));
+                bean.setChecked(rs.getInt("checked"));
                 bean.setPriority(rs.getInt("priority"));
                 bean.setOrderBy(rs.getInt("orderby"));
                 bean.setTitle(rs.getString("title"));
@@ -86,6 +87,7 @@ public class TodoDao {
 
             if(rs.next()){
                 bean.setId(rs.getString("id"));
+                bean.setChecked(rs.getInt("checked"));
                 bean.setPriority(rs.getInt("priority"));
                 bean.setOrderBy(rs.getInt("orderby"));
                 bean.setTitle(rs.getString("title"));
@@ -130,6 +132,7 @@ public class TodoDao {
             pstmt.setInt(2, newBean.getPriority());
             pstmt.setInt(3, newBean.getOrderBy());
             pstmt.setString(4, newBean.getTitle());
+            pstmt.setInt(5, newBean.getChecked());
 
             Boolean success = pstmt.execute();
 
@@ -198,7 +201,8 @@ public class TodoDao {
             pstmt.setInt(1, updateBean.getPriority());
             pstmt.setInt(2, updateBean.getOrderBy());
             pstmt.setString(3, updateBean.getTitle());
-            pstmt.setString(4, updateBean.getId());
+            pstmt.setInt(4, updateBean.getChecked());
+            pstmt.setString(5, updateBean.getId());
 
             int updateCount = pstmt.executeUpdate();
 

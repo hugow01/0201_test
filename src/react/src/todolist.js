@@ -5,16 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowAltCircleDown, faArrowAltCircleUp, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 
 export default () => {
-    const CONSTRUCT = { id: '', orderBy: 0, priority: 0, title: '' }
-    const [content, setContent] = useState([])
+    const CONSTRUCT = { id: '', orderBy: 0, priority: 0, title: '', checked: 0 }
+    const [content, setContent] = useState()
     const [tempTitle, setTempTitle] = useState('')
     const [editable, setEditable] = useState('')
-    const [ready, setReady] = useState(false)
 
 
     useEffect(() => {
         handleLoad()
-        setReady(true)
     }, [])
 
 
@@ -24,8 +22,10 @@ export default () => {
     }
 
     function handleEnter() {
+        
         if (tempTitle) {
-            const temp = { id: uuid(), orderBy: content.length > 0 ? content[content.length - 1].orderBy + 1 : 0, priority: 0, title: tempTitle }
+            let lastOrder = content.length > 0 ? content[content.length - 1].orderBy + 1 : 0
+            const temp = { id: uuid(), orderBy: lastOrder, priority: 0, title: tempTitle, checked: 0}
             content.push(temp)
             setTempTitle('')
             pubClient.post(temp, 'todolist')
@@ -40,17 +40,19 @@ export default () => {
 
     function handleChange(index, event) {
         const value = event.target.value
-        // let tempContent = [...content]
-        // tempContent[index] = { ...tempContent[index], title: value }
+        const name = event.target.name
+        const checked = event.target.checked?1:0
+        console.log(name + ': ' + value)
         setContent(prev=>{
-            console.log('prev')
-            console.log(prev)
-            prev[index]={...prev[index], title: value}
-            pubClient.put(prev[index], 'todolist')
+            prev[index]={...prev[index], [name]:name==='checked'?checked:value}
             return [...prev]
         })
-        // pubClient.put(tempContent[index], 'todolist')
         
+    }
+
+    function handleBlur(index){
+        setEditable('')
+        pubClient.put(content[index], 'todolist')
     }
 
     async function handleDelete(index) {
@@ -62,10 +64,6 @@ export default () => {
     async function handleswap(index, swap) {
         const lastIndex = content.length - 1
         if (index !== lastIndex || index !== 0) {
-            // let tempContent = [...content]
-            // tempContent[index + swap] = { ...content[index], orderBy: content[index + swap].orderBy }
-            // tempContent[index] = { ...content[index + swap], orderBy: content[index].orderBy }
-            // setContent([...tempContent])
             setContent(prev=>{
                 let temp = [...prev]
                 temp[index]={...prev[index+swap], orderBy: prev[index].orderBy}
@@ -102,25 +100,30 @@ export default () => {
                 </div>
                 <hr />
                 <div className='text-start form-group px-3'>
-                    {content.map((rowData, index) => (
+                    {content?.map((rowData, index) => (
                         <div className='card shadow-sm mt-2 px-3 d-flex row' key={index} onClick={() => { handleFocus(index) }}>
                             <div className="input-group my-1">
                                 <div className="input-group-prepend">
                                     <div className="input-group-text p-3">
-                                        <input type="checkbox"
+                                        <input 
+                                            type="checkbox"
+                                            name='checked'
                                             aria-label="Checkbox for following text input"
+                                            checked={rowData.checked}
+                                            onChange={event => handleChange(index, event)}
                                         />
                                     </div>
                                 </div>
                                 <input
+                                    name='title'
                                     type="text"
                                     className="form-control mr-1 border-0 border-bottom bg-light"
                                     aria-label="Text input with checkbox"
                                     value={rowData.title}
                                     disabled={editable !== rowData.orderBy}
                                     onChange={event => handleChange(index, event)}
-                                    onBlur={() => setEditable('')}
-                                    onKeyDown={event => { if (event.keyCode === 13) { setEditable('') } }}
+                                    onBlur={() => handleBlur(index)}
+                                    onKeyDown={event => { if (event.keyCode === 13) { handleBlur(index)} }}
                                 />
                                 <div className='d-flex justify-content-between'>
                                     <button
@@ -153,15 +156,6 @@ export default () => {
                         </div>
                     ))}
                 </div>
-                {content.length > 0 &&
-                    <>
-                        <hr />
-                        <div className='d-flex justify-content-center'>
-                            <button className='btn btn-danger mx-1' onClick={() => setContent([])}>清除</button>
-                            <button className='btn btn-primary mx-1' onClick={() => console.log(content)}>儲存</button>
-                        </div>
-                    </>
-                }
             </div>
         </>
     )
