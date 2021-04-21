@@ -22,37 +22,41 @@ export default () => {
     }
 
     function handleEnter() {
-        
         if (tempTitle) {
             let lastOrder = content.length > 0 ? content[content.length - 1].orderBy + 1 : 0
-            const temp = { id: uuid(), orderBy: lastOrder, priority: 0, title: tempTitle, checked: 0}
+            const temp = { id: uuid(), orderBy: lastOrder, priority: 0, title: tempTitle, checked: 0 }
             content.push(temp)
             setTempTitle('')
             pubClient.post(temp, 'todolist')
         }
-
-    }
-
-
-    function handleFocus(index) {
-        setEditable(index)
     }
 
     function handleChange(index, event) {
         const value = event.target.value
         const name = event.target.name
-        const checked = event.target.checked?1:0
-        console.log(name + ': ' + value)
-        setContent(prev=>{
-            prev[index]={...prev[index], [name]:name==='checked'?checked:value}
+        const checked = event.target.checked ? 1 : 0
+        console.log('onChange')
+        setContent(prev => {
+            prev[index] = { ...prev[index], [name]: name === 'checked' ? checked : value }
             return [...prev]
         })
-        
+
     }
 
-    function handleBlur(index){
+    function handleFocus(index) {
+        setEditable(index)
+    }
+
+    function handleBlur(index) {
         setEditable('')
         pubClient.put(content[index], 'todolist')
+        console.log('onBlur')
+    }
+
+    async function handleChecked(index, event) {
+        await handleChange(index, event)
+        console.log(content[index])
+        await handleBlur(index) 
     }
 
     async function handleDelete(index) {
@@ -64,12 +68,12 @@ export default () => {
     async function handleswap(index, swap) {
         const lastIndex = content.length - 1
         if (index !== lastIndex || index !== 0) {
-            setContent(prev=>{
+            setContent(prev => {
                 let temp = [...prev]
-                temp[index]={...prev[index+swap], orderBy: prev[index].orderBy}
-                temp[index+swap]={...prev[index], orderBy: prev[index+swap].orderBy}
+                temp[index] = { ...prev[index + swap], orderBy: prev[index].orderBy }
+                temp[index + swap] = { ...prev[index], orderBy: prev[index + swap].orderBy }
                 pubClient.put(temp[index], 'todolist')
-            pubClient.put(temp[index + swap], 'todolist')
+                pubClient.put(temp[index + swap], 'todolist')
                 return [...temp]
             })
         }
@@ -78,39 +82,42 @@ export default () => {
 
     return (
         <>
-            <div className='no-gutters'>
-                <h1 >Todo List</h1>
-                <div className='text-start'>
-                    <label>輸入代辦事項</label>
-                    <div className='d-flex justify-content-between'>
-                        <input
-                            type='text'
-                            name='todoTitle'
-                            className='form-control'
-                            value={tempTitle}
-                            onChange={event => setTempTitle(event.target.value)}
-                            onKeyDown={event => { if (event.keyCode === 13) { handleEnter() } }}
-                        />
-                        <button
-                            className='form-control w-25'
-                            onClick={handleEnter}
-                        >輸入
+            <div className='no-gutters mb-5'>
+                <div className='sticky-top bg-white pt-5'>
+                    <h1 >Todo List</h1>
+                    <div className='text-start'>
+                        <label>輸入代辦事項</label>
+                        <div className='d-flex justify-content-between'>
+                            <input
+                                type='text'
+                                name='todoTitle'
+                                className='form-control'
+                                value={tempTitle}
+                                onChange={event => setTempTitle(event.target.value)}
+                                onKeyDown={event => { if (event.keyCode === 13) { handleEnter() } }}
+                            />
+                            <button
+                                className='form-control w-25'
+                                onClick={handleEnter}
+                            >輸入
                         </button>
+                        </div>
                     </div>
+                    <hr />
                 </div>
-                <hr />
                 <div className='text-start form-group px-3'>
                     {content?.map((rowData, index) => (
-                        <div className='card shadow-sm mt-2 px-3 d-flex row' key={index} onClick={() => { handleFocus(index) }}>
+                        <div className='card shadow-sm mt-2 px-3 d-flex row' key={index} >
                             <div className="input-group my-1">
                                 <div className="input-group-prepend">
                                     <div className="input-group-text p-3">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             name='checked'
                                             aria-label="Checkbox for following text input"
                                             checked={rowData.checked}
-                                            onChange={event => handleChange(index, event)}
+                                            // onChange={event => { handleChange(index, event) }}
+                                            onClick={() => handleChecked(index.event )}
                                         />
                                     </div>
                                 </div>
@@ -122,8 +129,9 @@ export default () => {
                                     value={rowData.title}
                                     disabled={editable !== rowData.orderBy}
                                     onChange={event => handleChange(index, event)}
+                                    onClick={() => { handleFocus(index) }}
                                     onBlur={() => handleBlur(index)}
-                                    onKeyDown={event => { if (event.keyCode === 13) { handleBlur(index)} }}
+                                    onKeyDown={event => { if (event.keyCode === 13) { handleBlur(index) } }}
                                 />
                                 <div className='d-flex justify-content-between'>
                                     <button

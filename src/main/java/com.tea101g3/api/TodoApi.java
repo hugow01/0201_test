@@ -44,7 +44,6 @@ public class TodoApi extends HttpServlet{
         while((str = reader.readLine())!= null) {
             reqJson += str;
         }
-
         ListBean creatBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
         todoDao.createOne(creatBean);
     }
@@ -69,6 +68,7 @@ public class TodoApi extends HttpServlet{
         while((str = reader.readLine())!= null) {
             reqJson += str;
         }
+        System.out.println(reqJson);
         ListBean updateBean = objectMapper.readValue(reqJson, new TypeReference<ListBean>() {});
         todoService.updateOne(updateBean);
         PrintWriter writer = resp.getWriter();

@@ -4,7 +4,7 @@ import Todolist from './todolist';
 function App() {
   return (
     <div className="App">
-      <div className='container mt-5'>
+      <div className='container'>
         <Todolist />
       </div>
       {/* <header className="App-header">
